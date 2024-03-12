@@ -1,5 +1,7 @@
 import 'package:chat/routes/routes.dart';
+import 'package:chat/services/auth_service.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   runApp(const MyApp());
@@ -10,11 +12,18 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'ChatApp',
-      debugShowCheckedModeBanner: false,
-      initialRoute: 'chat',
-      routes: appRoutes,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (context) => AuthService(),
+        )
+      ],
+      child: MaterialApp(
+        title: 'ChatApp',
+        debugShowCheckedModeBanner: false,
+        initialRoute: 'loading',
+        routes: appRoutes,
+      ),
     );
   }
 }

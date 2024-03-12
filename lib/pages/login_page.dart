@@ -1,5 +1,8 @@
+import 'package:chat/helpers/mostrar_alerta.dart';
+import 'package:chat/services/auth_service.dart';
 import 'package:chat/widgets/widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
@@ -50,6 +53,7 @@ class _FormState extends State<_Form> {
   final passCtrl = TextEditingController();
   @override
   Widget build(BuildContext context) {
+    final authService = Provider.of<AuthService>(context);
     return Container(
       margin: const EdgeInsets.only(top: 40),
       padding: const EdgeInsets.symmetric(horizontal: 50),
@@ -73,9 +77,25 @@ class _FormState extends State<_Form> {
           //* crear boton
           BotonAzul(
             text: 'Ingresa',
-            onPressed: () {
-              print({emailCtrl.text, passCtrl.text});
-            },
+            onPressed: authService.autenticando
+                ? null
+                : () async {
+                    // Quitar el foco del teclado, se quita el teclado
+                    FocusScope.of(context).unfocus();
+                    final loginOk = await authService.login(
+                        emailCtrl.text.trim(), passCtrl.text.trim());
+                    if (loginOk) {
+                      //! Connectar al Socket server
+
+                      //!Navegar a otra pantalla
+                      // ignore: use_build_context_synchronously
+                      Navigator.pushReplacementNamed(context, 'usuarios');
+                    } else {
+                      // ignore: use_build_context_synchronously
+                      mostrarAlerta(context, 'Login incorrecto',
+                          'Revise sus credenciales nuevamente');
+                    }
+                  },
           )
         ],
       ),
