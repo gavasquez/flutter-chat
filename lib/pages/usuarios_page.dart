@@ -1,5 +1,6 @@
 import 'package:chat/models/usuario.dart';
 import 'package:chat/services/auth_service.dart';
+import 'package:chat/services/sockets_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -31,6 +32,8 @@ class _UsuariosPageState extends State<UsuariosPage> {
   Widget build(BuildContext context) {
     final authService = Provider.of<AuthService>(context);
     final usuario = authService.usuario;
+    final socketService = Provider.of<SocketService>(context);
+    print(socketService.serverStatus);
 
     _cargarUsuarios() async {
       // monitor network fetch
@@ -51,7 +54,10 @@ class _UsuariosPageState extends State<UsuariosPage> {
           leading: IconButton(
             onPressed: () {
               //! Desconectar del socket server
+              socketService.disconnect();
+              //* Navegar al Login
               Navigator.pushReplacementNamed(context, 'login');
+              //* Limpiar el token
               AuthService.deleteToken();
             },
             icon: const Icon(Icons.exit_to_app),
@@ -60,12 +66,16 @@ class _UsuariosPageState extends State<UsuariosPage> {
           actions: [
             Container(
               margin: const EdgeInsets.only(right: 10),
-              child: const Icon(
-                Icons.offline_bolt,
-                color: Colors.red,
-                /* Icons.check_circle,
-              color: Colors.blue, */
-              ),
+              child: (socketService.serverStatus == ServerStatus.Online)
+                  ? const Icon(
+                      Icons.check_circle,
+                      color: Colors.blue,
+                    )
+                  : const Icon(
+                      Icons.offline_bolt,
+                      color: Colors.red,
+                      /*  */
+                    ),
             )
           ],
         ),
