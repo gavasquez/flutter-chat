@@ -9,17 +9,14 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 enum ServerStatus { Online, Offline, Connecting }
 
 class SocketService with ChangeNotifier {
-  final ServerStatus _serverStatus = ServerStatus.Online;
+  ServerStatus serverStatus = ServerStatus.Connecting;
   late IO.Socket _socket;
-
-  ServerStatus get serverStatus => _serverStatus;
 
   IO.Socket get socket => _socket;
   Function get emit => _socket.emit;
 
   void connect() async {
-    final token =await AuthService.getToken();
-    print(token);
+    final token = await AuthService.getToken();
 
     // Dart client
     _socket = IO.io(
@@ -31,16 +28,15 @@ class SocketService with ChangeNotifier {
             .setExtraHeaders({'x-token': token})
             .build());
 
-  
-    //_socket.onConnect((data) {
-    //  _serverStatus = ServerStatus.Online;
-    //  notifyListeners();
-    //});
+    _socket.onConnect((data) {
+      serverStatus = ServerStatus.Online;
+      notifyListeners();
+    });
 
-    //_socket.onDisconnect((_) {
-    //  _serverStatus = ServerStatus.Offline;
-    //  notifyListeners();
-    //});
+    _socket.onDisconnect((_) {
+      serverStatus = ServerStatus.Offline;
+      notifyListeners();
+    });
   }
 
   void disconnect() {
